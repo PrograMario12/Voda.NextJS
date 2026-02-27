@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { getProjects, updateProjectStatus, deleteProject } from '@/app/actions/projects';
+import { ProjectStatus } from '@/lib/generated/prisma/client';
 import { Trash2, Loader2, FolderKanban } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,10 +55,6 @@ export default function ProjectsPage() {
     const [loading, setLoading] = useState(true);
     const [isPending, startTransition] = useTransition();
 
-    useEffect(() => {
-        loadProjects();
-    }, []);
-
     async function loadProjects() {
         setLoading(true);
         const data = await getProjects();
@@ -65,9 +62,27 @@ export default function ProjectsPage() {
         setLoading(false);
     }
 
+    useEffect(() => {
+        let mounted = true;
+
+        async function fetchProjects() {
+            setLoading(true);
+            const data = await getProjects();
+            if (mounted) {
+                setProjects(data as Project[]);
+                setLoading(false);
+            }
+        }
+
+        fetchProjects();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
     function handleStatusChange(projectId: string, newStatus: string) {
         startTransition(async () => {
-            await updateProjectStatus(projectId, newStatus as any);
+            await updateProjectStatus(projectId, newStatus as ProjectStatus);
             await loadProjects();
         });
     }

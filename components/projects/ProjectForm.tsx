@@ -74,7 +74,7 @@ export function ProjectForm() {
         businessValue: values.business_value,
         impactScore: values.impact_score,
         urgencyScore: values.urgency_score,
-        effortSize: values.effort_size as any,
+        effortSize: values.effort_size as EffortSize,
         calculatedPriority: priority,
       });
 

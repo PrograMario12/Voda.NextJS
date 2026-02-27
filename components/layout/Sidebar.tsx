@@ -7,8 +7,11 @@ import {
   LayoutDashboard,
   PlusCircle,
   FolderKanban,
-  Settings
+  Settings,
+  LogOut,
+  LogIn
 } from 'lucide-react';
+import { UserRole } from '@/lib/generated/prisma/client';
 
 const sidebarItems = [
   {
@@ -28,7 +31,11 @@ const sidebarItems = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  role?: UserRole;
+}
+
+export function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -40,6 +47,9 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-2">
         {sidebarItems.map((item) => {
+          // GUEST cannot see "New Request"
+          if (role === 'GUEST' && item.href === '/new') return null;
+
           const isActive = pathname === item.href;
           return (
             <Link
@@ -59,14 +69,34 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto pt-4 border-t border-slate-800">
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50"
-        >
-          <Settings className="h-4 w-4" />
-          Settings
-        </Link>
+      <div className="mt-auto pt-4 border-t border-slate-800 space-y-2">
+        {role === 'ADMIN' && (
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
+        )}
+
+        {role ? (
+          <Link
+            href="/api/auth/signout"
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Link>
+        ) : (
+          <Link
+            href="/api/auth/signin"
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign In
+          </Link>
+        )}
       </div>
     </div>
   );
