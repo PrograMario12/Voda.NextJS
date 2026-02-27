@@ -1,0 +1,32 @@
+
+> my-app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 5s
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/node_modules_@auth_core_544da84f._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/node_modules_@auth_core_544da84f._.js:5331:210)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/node_modules_@auth_core_544da84f._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/node_modules_@auth_core_544da84f._.js:5331:210)
+Initializing Prisma with URL: postgresql://user:***@localhost:5432/db_name?schema=public
+Initializing Prisma with URL: postgresql://user:***@localhost:5432/db_name?schema=public
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/node_modules_@auth_core_36df0127._.js:513:16)
+    at Auth (/app/.next/dev/server/chunks/node_modules_@auth_core_36df0127._.js:5330:204)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+ GET /api/auth/signin 500 in 3.2s (compile: 3.2s, proxy.ts: 6ms, render: 37ms)
+  Reload env: .env
+ GET /api/auth/signin 200 in 124ms (compile: 84ms, proxy.ts: 10ms, render: 29ms)
+Initializing Prisma with URL: postgresql://user:***@localhost:5432/db_name?schema=public
+✓ Compiled in 38ms
+ GET /api/auth/signin 200 in 283ms (compile: 260ms, proxy.ts: 8ms, render: 15ms)
+Initializing Prisma with URL: postgresql://user:***@localhost:5432/db_name?schema=public

@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { EffortSize, ProjectStatus } from "@/lib/generated/prisma/client";
+import { auth } from "@/lib/auth";
 
 // ── Types for actions ────────────────────────────────────────
 export type ActionResult = {
@@ -22,6 +23,11 @@ export async function createProject(formData: {
   calculatedPriority: number;
 }): Promise<ActionResult> {
   try {
+    const session = await auth();
+    if (!session || !session.user || session.user.role === 'GUEST') {
+      return { success: false, message: "Unauthorized to create projects." };
+    }
+
     const project = await prisma.project.create({
       data: {
         title: formData.title,
@@ -32,6 +38,7 @@ export async function createProject(formData: {
         effortSize: formData.effortSize,
         calculatedPriority: formData.calculatedPriority,
         status: ProjectStatus.draft,
+        authorId: session.user.id,
       },
     });
 
@@ -103,6 +110,11 @@ export async function updateProjectStatus(
   status: ProjectStatus,
 ): Promise<ActionResult> {
   try {
+    const session = await auth();
+    if (!session || !session.user || session.user.role !== 'ADMIN') {
+      return { success: false, message: "Unauthorized. Only ADMIN can update project status." };
+    }
+
     await prisma.project.update({
       where: { id: projectId },
       data: { status },
@@ -121,6 +133,11 @@ export async function updateProjectStatus(
 // ── Delete a project ─────────────────────────────────────────
 export async function deleteProject(projectId: string): Promise<ActionResult> {
   try {
+    const session = await auth();
+    if (!session || !session.user || session.user.role !== 'ADMIN') {
+      return { success: false, message: "Unauthorized. Only ADMIN can delete projects." };
+    }
+
     await prisma.project.delete({
       where: { id: projectId },
     });

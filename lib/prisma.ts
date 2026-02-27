@@ -2,7 +2,7 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.DATABASE_URL || "postgresql://user:password@localhost:5432/db_name?schema=public";
 
 const prismaClientSingleton = () => {
   // Log para depuración (visible en la terminal de Next.js)
