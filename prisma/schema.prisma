@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  draft
+  analyzing
+  approved
+  backlog
+  in_progress
+  qa
+  prod
+
+  @@map("project_status")
+}
+
+enum EffortSize {
+  S
+  M
+  L
+  XL
+
+  @@map("effort_size")
+}
+
+model Project {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  title              String
+  description        String?
+  businessValue      String?       @map("business_value")
+  impactScore        Int?          @map("impact_score")
+  urgencyScore       Int?          @map("urgency_score")
+  effortSize         EffortSize    @map("effort_size")
+  calculatedPriority Float?        @map("calculated_priority")
+  status             ProjectStatus @default(draft)
+
+  @@map("projects")
+}

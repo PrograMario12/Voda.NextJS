@@ -25,7 +25,10 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculatePriority } from '@/lib/priority-calculator';
 import { EffortSize } from '@/types';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { createProject } from '@/app/actions/projects';
+import { useRouter } from 'next/navigation';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -41,7 +44,9 @@ const formSchema = z.object({
 });
 
 export function ProjectForm() {
-  const [calculatedScore, setCalculatedScore] = useState<number | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -56,22 +61,34 @@ export function ProjectForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // This is where we would save to Supabase
     const priority = calculatePriority(
       values.impact_score,
       values.urgency_score,
       values.effort_size as EffortSize
     );
 
-    setCalculatedScore(priority);
+    startTransition(async () => {
+      const result = await createProject({
+        title: values.title,
+        description: values.description,
+        businessValue: values.business_value,
+        impactScore: values.impact_score,
+        urgencyScore: values.urgency_score,
+        effortSize: values.effort_size as any,
+        calculatedPriority: priority,
+      });
 
-    console.log('Form Submitted:', { ...values, calculated_priority: priority });
-    alert(`Project Submitted! Calculated Priority: ${priority}`);
+      setSubmitResult(result);
+
+      if (result.success) {
+        form.reset();
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      }
+    });
   }
 
-  // Watch values for live calculation preview if desired,
-  // or just calculate on change. Here we calculate on submit as requested,
-  // but let's show a preview as well.
   const impact = form.watch('impact_score');
   const urgency = form.watch('urgency_score');
   const effort = form.watch('effort_size');
@@ -247,8 +264,28 @@ export function ProjectForm() {
               </CardContent>
             </Card>
 
-            <Button type="submit" size="lg" className="w-full">
-              Submit Request
+            {/* Submit result message */}
+            {submitResult && (
+              <div
+                className={`flex items-center gap-2 p-4 rounded-lg text-sm font-medium ${submitResult.success
+                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                    : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                  }`}
+              >
+                {submitResult.success && <CheckCircle2 className="h-4 w-4" />}
+                {submitResult.message}
+              </div>
+            )}
+
+            <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Submit Request'
+              )}
             </Button>
           </form>
         </Form>
@@ -275,11 +312,11 @@ export function ProjectForm() {
                 <li>Impact: {impact}</li>
                 <li>Urgency: {urgency}</li>
                 <li>Effort: {effort} ({
-                    effort === 'S' ? 1 :
+                  effort === 'S' ? 1 :
                     effort === 'M' ? 3 :
-                    effort === 'L' ? 5 :
-                    effort === 'XL' ? 8 : 0
-                  })
+                      effort === 'L' ? 5 :
+                        effort === 'XL' ? 8 : 0
+                })
                 </li>
               </ul>
             </div>
